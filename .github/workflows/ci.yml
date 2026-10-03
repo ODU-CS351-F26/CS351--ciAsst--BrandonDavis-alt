@@ -4,9 +4,14 @@ on:
   push:
     branches: [ main ]
 
+permissions:
+  contents: write
+
 jobs:
   build:
+
     runs-on: ubuntu-latest
+
     steps:
     - uses: actions/checkout@v4
     - name: Set up JDK 21
@@ -18,3 +23,7 @@ jobs:
       run: chmod +x gradlew
     - name: Build and test
       run: ./gradlew build
+    - name: Publish reports to website
+      run: ./gradlew deployReports --console=plain
+      env:
+        GRGIT_USER: ${{ secrets.GITHUB_TOKEN }}
