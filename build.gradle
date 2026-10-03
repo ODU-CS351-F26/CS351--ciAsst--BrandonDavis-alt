@@ -47,7 +47,9 @@ tasks.register('reports') {
 }
 
 gitPublish {
-    repoUri = 'git@github.com:ODU-CS351-F26/CS351--ciAsst--BrandonDavis-alt.git'
+        repoUri = System.getenv('GITHUB_ACTIONS') ?
+        'https://github.com/ODU-CS351-F26/CS351--ciAsst--BrandonDavis-alt.git' :
+        'git@github.com:ODU-CS351-F26/CS351--ciAsst--BrandonDavis-alt.git'
     branch = 'gh-pages'
     contents {
         from 'build/reports'
