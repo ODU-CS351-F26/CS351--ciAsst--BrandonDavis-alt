@@ -1,6 +1,9 @@
 plugins {
     id 'java'
     id 'application'
+    id 'checkstyle'
+    id 'pmd'
+    id 'com.github.spotbugs' version '6.0.26'   // confirm latest on plugins.gradle.org
     id 'org.ajoberstar.git-publish' version '4.2.0'
 }
 
@@ -31,6 +34,45 @@ application { //Allows  ./gradlew run --args=path-to-test-data
     mainClass = 'edu.odu.cs.MostCommonWords'
 }
 
+checkstyle {
+    toolVersion = '10.17.0'
+    ignoreFailures = true
+}
+
+tasks.withType(Checkstyle).configureEach {
+    reports {
+        html.required = true
+        xml.required = false
+    }
+}
+
+pmd {
+    ignoreFailures = true
+    ruleSets = []
+    ruleSetConfig = resources.text.fromString('''<?xml version="1.0"?>
+<ruleset name="basic" xmlns="http://pmd.sourceforge.net/ruleset/2.0.0">
+  <description>Basic rules</description>
+  <rule ref="category/java/bestpractices.xml"/>
+  <rule ref="category/java/errorprone.xml"/>
+</ruleset>''')
+}
+
+spotbugs {
+    ignoreFailures = true
+}
+
+tasks.withType(com.github.spotbugs.snom.SpotBugsTask).configureEach {
+    reports {
+        html {
+            required = true
+        }
+    }
+}
+
+tasks.named('checkstyleTest') { enabled = false }
+tasks.named('pmdTest')        { enabled = false }
+tasks.named('spotbugsTest')   { enabled = false }
+
 tasks.register('copyHtml', Copy) {
     from 'src/main/html'
     into 'build/reports'
@@ -47,7 +89,7 @@ tasks.register('reports') {
 }
 
 gitPublish {
-        repoUri = System.getenv('GITHUB_ACTIONS') ?
+    repoUri = System.getenv('GITHUB_ACTIONS') ?
         'https://github.com/ODU-CS351-F26/CS351--ciAsst--BrandonDavis-alt.git' :
         'git@github.com:ODU-CS351-F26/CS351--ciAsst--BrandonDavis-alt.git'
     branch = 'gh-pages'
@@ -61,4 +103,3 @@ gitPublishCopy.dependsOn 'reports'
 tasks.register('deployReports') {
     dependsOn 'reports', 'gitPublishPush'
 }
-
